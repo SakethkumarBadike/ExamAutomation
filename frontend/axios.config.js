@@ -23,8 +23,12 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
-
+        const isLoginRequest = originalRequest.url.includes("/auth/login/") || originalRequest.url.includes("/auth/refresh/");
         // Try refreshing token on 401
+        if (isLoginRequest) {
+            // If it's a login or refresh request, just reject the error
+            return Promise.reject(error);
+        }
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 

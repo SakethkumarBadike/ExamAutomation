@@ -29,17 +29,37 @@ function ForgotPassword() {
     }
   };
 
+  // useEffect(() => {
+  //   let timer;
+  //   if (isCooldown && timeLeft > 0) {
+  //     timer = setInterval(() => {
+  //       setTimeLeft((prev) => prev - 1);
+  //     }, 1000);
+  //   } else if (timeLeft === 0) {
+  //     setIsCooldown(false);
+  //   }
+  //   return () => clearInterval(timer);
+  // }, [isCooldown, timeLeft]);
+
+
+
   useEffect(() => {
-    let timer;
-    if (isCooldown && timeLeft > 0) {
-      timer = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    } else if (timeLeft === 0) {
-      setIsCooldown(false);
-    }
-    return () => clearInterval(timer);
-  }, [isCooldown, timeLeft]);
+  let timer;
+  
+  if (isCooldown) {
+    timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          setIsCooldown(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }
+  
+  return () => clearInterval(timer); // Cleanup runs only when `isCooldown` changes or unmount
+}, [isCooldown]); // ✅ Now depends only on `isCooldown`
 
   
 

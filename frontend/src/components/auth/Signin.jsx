@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import api from "../../../axios.config";
@@ -9,12 +9,16 @@ const Login = () => {
     const [formData, setFormData] = useState({ email: "", password: "" });
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false); 
-    const { login } = useAuthStore();
+    const { login,user } = useAuthStore();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
+    useEffect(() => {
+        console.log("User in Login component:", user);
+    },[])
+            // If user is already logged in, redirect to hom
 
     const handleSubmit = async (e) => {
         e.preventDefault();

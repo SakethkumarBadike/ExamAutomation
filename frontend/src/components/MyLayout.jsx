@@ -9,23 +9,33 @@ import api from "../../axios.config";
 import useClassroom from "../store/useClassroom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { use } from "react";
 
 
 export default function MyLayout() {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user ,checkAuth} = useAuthStore();
   const [isToastVisible, setIsToastVisible] = useState(false);
   const [data, setData] = useState("");
   const { setUpdatedClass } = useClassroom();
   const [showSideBar, setShowSideBar] = useState(false);
+    const [userLoggedIn, setUserLoggedIn] = useState(false);
+
+  
 
   // Handle create/join classroom
   async function handleOnClick() {
+
     try {
+      if(!userLoggedIn){
+        navigate('/signin');
+        return;
+      }
       if (user.role === "S") {
-        await api.post(`${import.meta.env.VITE_BASE_URL}/classrooms/join/${data}/`);
+        //${import.meta.env.VITE_BASE_URL}
+        await api.post(`/classrooms/join/${data}/`);
       } else {
-        await api.post(`${import.meta.env.VITE_BASE_URL}/classrooms/`, {
+        await api.post(`/classrooms/`, {
           name: data,
         });
       }
@@ -55,14 +65,21 @@ export default function MyLayout() {
     setData("");
   }
 
- 
-
   useEffect(() => {
-    if(!user) {
-      navigate("/signin");
+    async function checkUserAuth() {
+      const isAuthenticated = await checkAuth();
+      console.log("User is authenticated:", isAuthenticated);
+      if (isAuthenticated.status===200) {
+        setUserLoggedIn(true);
+      } else {
+        setUserLoggedIn(false);
+        navigate('/signin'); // Redirect to sign-in if not authenticated
+      }
     }
-  },[user])
+    checkUserAuth();
+  },[])
 
+if(user){
   return (
     <div className="h-screen w-full flex flex-col">
       {/* ✅ Navbar */}
@@ -77,7 +94,6 @@ export default function MyLayout() {
             <IoIosMenu
               className=" md:hidden w-7 h-7 mr-1 cursor-pointer"
               onClick={() => setShowSideBar(true)}
-              
             />
           )}
           <h4 className="font-[poppins] font-medium">NIT ANP</h4>
@@ -109,7 +125,7 @@ export default function MyLayout() {
 
         {/* ✅ Main Content */}
         <div className="flex-1 md:ml-[16.67%] overflow-y-auto">
-          <Outlet />
+          <Outlet userLoggedIn={userLoggedIn}/>
           <ToastContainer />
         </div>
       </div>
@@ -144,4 +160,14 @@ export default function MyLayout() {
       )}
     </div>
   );
+
+}
+
+
+return (
+  <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+    <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin mb-4"></div>
+    <p className="text-lg text-gray-600">Redirecting to sign-in...</p>
+  </div>
+);
 }

@@ -17,6 +17,7 @@ import Tests from './components/quiz/test'
 import Results from './components/quiz/Results'
 import ForgetPassword from './components/auth/ForgetPassword';
 import ResetPassword from './components/auth/ResetPassword';
+import useAuthStore from './store/useAuthStore';
 
 function App() {
   const router = createBrowserRouter([

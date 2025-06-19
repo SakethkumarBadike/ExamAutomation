@@ -11,10 +11,10 @@ import { useNavigate } from "react-router-dom";
 export default function Home() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true); // New state for loading
-  const { user } = useAuthStore();
+  const { user,checkAuth } = useAuthStore();
   const navigate = useNavigate();
   const { updatedClass, setUpdatedClass } = useClassroom();
-
+  
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true); // Set loading to true when fetching starts
@@ -44,14 +44,7 @@ export default function Home() {
     } else {
       setIsLoading(false); // If no user, set loading to false
     }
-  }, [updatedClass, user]);
-
-  useEffect(() => {
-    if(!user) {
-      navigate("/signin");
-    }
-  },[user])
-
+  }, [updatedClass]);
   return (
     <div className="h-full w-full">  {/* changed height from screen to full*/}
       <div className="overflow-y-auto">
@@ -78,4 +71,6 @@ export default function Home() {
       </div>
     </div>
   );
+
+  
 }

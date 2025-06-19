@@ -1,10 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import api from "../../axios.config";
 
 const useAuthStore = create(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
+      
 
       login: (role, id) => {
         set({ user: { role, id } });
@@ -12,22 +14,28 @@ const useAuthStore = create(
       },
 
       logout: () => {
-        set({ user: null });
+        set({ user: null, });
+        localStorage.removeItem("auth-store");
       },
 
-      checkAuth: () => {
-        const user=get(state => state.user);
-        if (user) {
-        
-            return true;
-            }
-        
-        return false;
-        }
+      checkAuth: async () => {
+        try {
+          const res = await api.get("/auth/user/");
+          if (res?.data) {
+            set({ user: res.data });
+            console.log("User is authenticated:", res.data);
+            return { status: 200 };
+          }
+        } catch (err) {
+          console.warn("User is NOT authenticated");
+          set({ user: null });
+          return { status: 401 };
+        } 
+      }
     }),
     {
-      name: "auth-store", // name in localStorage
-      partialize: (state) => ({ user: state.user }), // only persist 'user'
+      name: "auth-store",
+      partialize: (state) => ({ user: state.user }) // persist only user
     }
   )
 );
