@@ -1,7 +1,7 @@
 import { FaHome, FaBook, FaClipboardList, FaUsers, FaCog, FaSignOutAlt } from "react-icons/fa";
 import { IoHome } from "react-icons/io5";
 import { NavLink } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useLocation } from "react-router-dom";
 import useAuthStore from "../store/useAuthStore";
 import Cookies from "js-cookie";
 import api from "../../axios.config";
@@ -13,7 +13,7 @@ import { useState } from "react";
 const Sidebar = () => {
   const navigate = useNavigate();
   const { logout } = useAuthStore();
-  
+  const location = useLocation();
 
   const handleLogout = async () => {
     console.log("Logout clicked");
@@ -50,20 +50,24 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="w-full flex flex-col ">
       <nav className="flex flex-col space-y-4">
-        <NavLink to="/" className={({isActive}) => (isActive ? "text-blue-700" : "")}>
+        <NavLink to="/" className={({isActive}) => ((isActive||location.pathname.includes('classroom')) ? "text-indigo-700" : "")}>
           <SidebarItem icon={<IoHome/>} text="HOME" />
         </NavLink>
-        <NavLink to="/tests" className={({isActive}) => (isActive ? "text-blue-700" : "")}>
+        <NavLink to="/tests" className={({isActive}) => (isActive  ? "text-indigo-700" : "")}>
           <SidebarItem icon={<FaClipboardList />} text="Tests" />
         </NavLink>
-        <NavLink to='/settings' className={({isActive}) => (isActive ? "text-blue-700" : "")}>
+        <NavLink to='/settings' className={({isActive}) => (isActive ? "text-indigo-700" : "")}>
           <SidebarItem icon={<FaCog />} text="Settings" />
         </NavLink>
         
-        <div onClick={handleLogout}>
-          <SidebarItem icon={<FaSignOutAlt />} text="Logout" />
+        <div
+          onClick={handleLogout}
+          className="flex items-center space-x-3 p-3  rounded cursor-pointer text-red-600 hover:bg-red-100 hover:text-red-800 transition ease-in duration-150"
+        >
+          <FaSignOutAlt className="text-xl" />
+          <span className="font-roboto">Logout</span>
         </div>
       </nav>
     </div>

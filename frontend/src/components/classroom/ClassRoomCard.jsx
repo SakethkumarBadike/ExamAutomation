@@ -1,15 +1,18 @@
-import { FaEllipsisV, FaTrash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { FaTrash, FaSignOutAlt,FaExternalLinkAlt } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import api from "../../../axios.config";
 import useAuthStore from "../../store/useAuthStore";
 import useClassroom from "../../store/useClassroom";
-const ClassroomCard = ({ title ,teacher,id}) => {
+import { useNavigate } from "react-router-dom";
+
+const ClassroomCard = ({ title, teacher, id }) => {
+  const navigate = useNavigate();
   const [showOptions, setShowOptions] = useState(false);
   const [toast, setToast] = useState(null);
-  const [confirmToast, setConfirmToast ] = useState(null);
+  const [confirmToast, setConfirmToast] = useState(null);
   const { user } = useAuthStore();
   const { setUpdatedClass } = useClassroom();
+
   useEffect(() => {
     if (showOptions) {
       const handleClickOutside = () => setShowOptions(false);
@@ -23,35 +26,38 @@ const ClassroomCard = ({ title ,teacher,id}) => {
     setShowOptions(!showOptions);
   }
 
- async function handleDeleteConfirm() {
-    await api.delete(`/classrooms/${id}/`);                                      // TODO:add Try Catch
-
+  async function handleDeleteConfirm() {
+    await api.delete(`/classrooms/${id}/`);
     setUpdatedClass(true);
-    showToast("Class deleted successfully!", "error");                          //TODO :user React Toast
-      
+    showToast("Class deleted successfully!", "error");
     setConfirmToast(null);
   }
 
- async function handleExitConfirm() {
-    await api.delete(`/classrooms/enrollments/${id}/`);   
-    setUpdatedClass(true);                                   // TODO:add Try Catch
+  async function handleExitConfirm() {
+    await api.delete(`/classrooms/enrollments/${id}/`);
+    setUpdatedClass(true);
     showToast("You exited the class!", "info");
     setConfirmToast(null);
   }
 
   function handleDelete(e) {
     e.stopPropagation();
-    setConfirmToast({ message: "Are you sure you want to delete this class?", onConfirm: ()=>{ 
-      handleDeleteConfirm()} });
+    setConfirmToast({
+      message: "Are you sure you want to delete this class?",
+      onConfirm: () => {
+        handleDeleteConfirm();
+      },
+    });
   }
 
   function handleExit(e) {
     e.stopPropagation();
-    setConfirmToast({ message: "Are you sure you want to exit this class?", onConfirm: ()=>{
-     
-      handleExitConfirm()}
-      
-     });
+    setConfirmToast({
+      message: "Are you sure you want to exit this class?",
+      onConfirm: () => {
+        handleExitConfirm();
+      },
+    });
   }
 
   function showToast(message, type) {
@@ -60,63 +66,131 @@ const ClassroomCard = ({ title ,teacher,id}) => {
   }
 
   return (
-    <div className="relative w-full sm:w-80 h-52 rounded-2xl overflow-hidden shadow-lg transition-transform transform hover:scale-[1.03] hover:shadow-2xl">
-     
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-indigo-500 to-blue-500"></div>
-
-     
-      <div className="absolute top-4 left-5 text-white">
-        <h2 className="text-xl font-semibold font-[poppins] w-60 truncate">{title}</h2>
-
-        <p className="text-sm opacity-80 font-[roboto]">{teacher}</p>
-        <p>{id}</p>
+    <div
+      className="relative
+        rounded-xl
+        p-6
+        w-full max-w-sm
+        cursor-default
+        flex flex-col justify-between
+        border border-indigo-300
+        shadow-lg
+        transition-shadow duration-300 transform hover:shadow-xl hover:scale-[1.03]
+        bg-gradient-to-tr from-indigo-100 via-purple-100 to-pink-100"
+      role="group"
+      aria-label={`Classroom card for ${title}`}
+    >
+      {/* Top Info */}
+      <div>
+        <h3
+          className="text-2xl font-semibold text-indigo-900 truncate"
+          title={title}
+        >
+          {title}
+        </h3>
+        <p className="text-sm text-indigo-700 mt-1 truncate" title={teacher}>
+          {teacher}
+        </p>
       </div>
 
-      {/* Floating Menu Icon */}
-      <button className="absolute top-4 right-4 text-white opacity-70 hover:opacity-100 cursor-pointer" onClick={handleClick}>
-        <FaEllipsisV />
-      </button>
+      {/* Bottom Info & Controls */}
+      <div className="flex justify-between items-center mt-6">
+        <span className="text-xs font-mono text-indigo-400 select-text">{id}</span>
 
-      {/* Options Toast */}
-      {showOptions && (
-        <div className="absolute top-12 right-4   bg-red-500 hover:bg-red-600 shadow-lg rounded-xl w-40 backdrop-blur-md" onClick={(e) => e.stopPropagation()}>
-          {user.role=='T' ? (
-            <button
-              onClick={handleDelete}
-              className="w-full text-white  py-2 rounded-md text-sm font-[roboto]"
+        {/* Open Class button */}
+        <button
+          onClick={() => navigate(`/classroom/${id}/quizes`)}
+          className="flex items-center space-x-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          type="button"
+          aria-label={`Open classroom ${title}`}
+        >
+          <span>Open Class</span>
+          <FaExternalLinkAlt />
+        </button>
+
+        {/* Options button */}
+        <div className="relative ml-3" onClick={(e) => e.stopPropagation()}>
+          <button
+            aria-label="Options"
+            onClick={handleClick}
+            className="p-2 rounded-md hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            type="button"
+          >
+            <svg
+              className="w-5 h-5 text-indigo-700"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              aria-hidden="true"
             >
-              <FaTrash className="inline mr-2" /> Delete Class
-            </button>
-          ) : (
-            <button
-              onClick={handleExit}
-              className="w-full text-white  py-2 rounded-md text-sm font-[roboto]"
+              <circle cx="3" cy="10" r="2" />
+              <circle cx="10" cy="10" r="2" />
+              <circle cx="17" cy="10" r="2" />
+            </svg>
+          </button>
+
+          {/* Dropdown */}
+          {showOptions && (
+            <div
+              className="absolute right-0 mt-2 w-44 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5
+               focus:outline-none z-10"
             >
-              Exit Class
-            </button>
+              {user.role === "T" ? (
+                <button
+                  onClick={handleDelete}
+                  className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md"
+                  type="button"
+                >
+                  <FaTrash className="mr-2" /> Delete Class
+                </button>
+              ) : (
+                <button
+                  onClick={handleExit}
+                  className="flex items-center w-full px-4 py-2 text-sm text-indigo-700 hover:bg-indigo-50 rounded-md"
+                  type="button"
+                >
+                  <FaSignOutAlt className="mr-2" /> Exit Class
+                </button>
+              )}
+            </div>
           )}
+        </div>
+      </div>
+
+      {/* Toast */}
+      {toast && (
+        <div
+          className={`fixed top-5 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-md text-sm font-semibold text-white ${
+            toast.type === "error" ? "bg-red-500" : "bg-indigo-600"
+          } shadow-lg animate-fade-in`}
+          role="alert"
+        >
+          {toast.message}
         </div>
       )}
 
-      {/* Bottom Section */}
-      <div className="absolute bottom-0 w-full bg-white/90 backdrop-blur-lg px-5 py-3 flex justify-between items-center rounded-b-2xl">
-        <Link to={`/classroom/${id}/quizes`}>
-          <p className="hover:text-blue-700 cursor-pointer text-gray-700 text-sm font-[roboto]">View Class</p>
-        </Link>
-      </div>
-
-      {/* Toast Notification */}
-      {toast && (
-        <div className={`fixed top-5 left-1/2 transform -translate-x-1/2 px-4 py-2 shadow-lg rounded-lg text-sm font-semibold text-white transition-opacity duration-300 animate-fade-in ${toast.type === 'error' ? 'bg-red-500' : 'bg-blue-500'}`}>{toast.message}</div>
-      )}
-
-      {/* Confirmation Toast */}
+      {/* Confirm Modal */}
       {confirmToast && (
-        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 shadow-lg rounded-lg text-center w-80">
-          <p className="text-gray-800 font-semibold">{confirmToast.message}</p>
-          <div className="flex justify-around mt-4">
-            <button onClick={() => setConfirmToast(null)} className="px-4 py-2 bg-gray-300 rounded-md">Cancel</button>
-            <button onClick={confirmToast.onConfirm} className="px-4 py-2 bg-red-500 text-white rounded-md">Confirm</button>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="bg-white rounded-lg shadow-lg p-6 w-80 max-w-full text-center">
+            <p className="mb-4 text-gray-900 font-semibold">{confirmToast.message}</p>
+            <div className="flex justify-around">
+              <button
+                onClick={() => setConfirmToast(null)}
+                className="px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmToast.onConfirm}
+                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
+              >
+                Confirm
+              </button>
+            </div>
           </div>
         </div>
       )}

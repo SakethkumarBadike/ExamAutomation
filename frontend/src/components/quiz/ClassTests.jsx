@@ -90,7 +90,7 @@ export function QuizDashboard() {
   }
 
   return (
-    <div className="shadow-md rounded-lg w-full mx-auto p-6 bg-white">
+    <div className="shadow-md rounded-lg w-full mx-auto p-6 bg-white  ">
       <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">
         {role === "T" ? "Teacher Dashboard" : "Student Dashboard"}
       </h1>

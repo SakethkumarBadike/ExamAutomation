@@ -14,6 +14,7 @@ import { use } from "react";
 
 export default function MyLayout() {
   const navigate = useNavigate();
+  
   const { user ,checkAuth} = useAuthStore();
   const [isToastVisible, setIsToastVisible] = useState(false);
   const [data, setData] = useState("");
@@ -81,7 +82,7 @@ export default function MyLayout() {
 
 if(user){
   return (
-    <div className="h-screen w-full flex flex-col">
+    <div className="h-screen w-full flex flex-col ">
       {/* ✅ Navbar */}
       <div className="p-5 flex items-center border-b border-gray-400 justify-between bg-white w-full fixed top-0 z-50">
         <div className="flex items-center">
@@ -98,11 +99,12 @@ if(user){
           )}
           <h4 className="font-[poppins] font-medium">NIT ANP</h4>
         </div>
-        <div className="flex items-center space-x-5 cursor-pointer bg-blue-500 px-3 rounded-xl font-medium text-white" onClick={() => setIsToastVisible(true)}>
-          {user?.role === "T" && <h2>Create Classroom</h2>}
-          {user?.role === "S" && <h2>Join Classroom</h2>}
-          
-        </div>
+        <div
+            className="flex items-center space-x-5 cursor-pointer bg-gradient-to-r from-blue-500 to-indigo-500 px-4 py-1 rounded-lg font-semibold text-white hover:from-blue-600 hover:to-indigo-600"
+            onClick={() => setIsToastVisible(true)}
+          >
+            <h2>{user?.role === "T" ? "Create Classroom" : "Join Classroom"}</h2>
+          </div>
       </div>
 
       {/* ✅ Wrapper for Sidebar + Content */}
@@ -116,7 +118,7 @@ if(user){
         </div>
         {showSideBar && (
           <div
-            className="md:hidden border-r border-gray-500 pt-2.5 h-[calc(100vh-70px)] fixed left-0 top-[70px] overflow-y-auto bg-white shadow-lg transition-transform duration-300 ease-in-out"
+            className="md:hidden border-r z-1 border-gray-500 pt-2.5 h-[calc(100vh-70px)] fixed left-0 top-[70px] overflow-y-auto bg-white shadow-lg transition-transform duration-300 ease-in-out"
             style={{ transform: showSideBar ? "translateX(0)" : "translateX(-100%)" }}
           >
             <Sidebar  />
