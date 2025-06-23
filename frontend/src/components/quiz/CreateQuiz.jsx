@@ -17,7 +17,8 @@ const CreateExamAndQuestions = () => {
     const [questionsInBank, setQuestionsInBank] = useState(new Set());
     const navigate = useNavigate();
     const { id } = useParams();
-
+    const [editingQuestion, setEditingQuestion] = useState(null);
+     
     const totalMarksUsed = questions.reduce((sum, q) => sum + parseFloat(q.question.marks), 0);
 
     const handleCreateExamSubmit = (e) => {
@@ -57,6 +58,8 @@ const CreateExamAndQuestions = () => {
             };
             setQuestions(updatedQuestions);
             setEditingIndex(null);
+            setEditingQuestion(null);
+            return;
         } else {
             if (questions.length >= numQuestions) {
                 alert(`You can only add ${numQuestions} questions.`);
@@ -86,6 +89,11 @@ const CreateExamAndQuestions = () => {
     };
 
     const handleEditQuestion = (index) => {
+        setEditingQuestion(questions[index]);
+        setQuestions(prevQuestions => {
+            return prevQuestions.filter((_, i) => i !== index)
+        }            
+        )
         setEditingIndex(index);
     };
 
@@ -224,7 +232,7 @@ const CreateExamAndQuestions = () => {
                             onAddQuestion={handleAddOrUpdateQuestion}
                             totalMarks={totalMarks}
                             totalMarksUsed={totalMarksUsed}
-                            editingQuestion={editingIndex !== null ? questions[editingIndex] : null}
+                            editingQuestion={editingQuestion}
                             questionsInBank={questionsInBank}
                             setQuestionsInBank={setQuestionsInBank}
                         />
@@ -346,6 +354,7 @@ const QuestionForm = ({
     };
 
     const validateQuestion = () => {
+        
         if (!question.trim()) {
             alert("Question text cannot be empty!");
             return false;
@@ -357,6 +366,9 @@ const QuestionForm = ({
         if (!marks || parseFloat(marks) <= 0) {
             alert("Marks must be a positive number.");
             return false;
+        }
+        if(editingQuestion && editingQuestion.question.marks === parseFloat(marks)){
+            return true; // No need to check total marks if marks haven't changed
         }
         if (totalMarksUsed + parseFloat(marks) > parseFloat(totalMarks)) {
             alert(`Total marks cannot exceed ${totalMarks}.`);
@@ -377,8 +389,16 @@ const QuestionForm = ({
             difficulty,
         };
         onAddQuestion(newQuestion);
-        resetForm();
+        resetForm()
     };
+    const resetForm=()=>{
+        setQuestion("");
+        setOptions(["", "", "", ""]);
+        setCorrectOption(0);
+        setQuestionType("MCQ");
+        setMarks("");
+        setDifficulty("easy");
+    }
 
     const handleAddToBank = async () => {
         if (!validateQuestion()) return;
@@ -498,6 +518,7 @@ const QuestionForm = ({
                     {editingQuestion ? "Update Question" : "Add Question"}
                 </button>
                 <button
+
                     onClick={handleAddToBank}
                     className={`flex-1 p-3 rounded-md ${
                         questionsInBank.has(`${question}-${questionType}-${marks}`)
