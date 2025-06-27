@@ -3,105 +3,9 @@ import api from "../../../axios.config";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../../store/useAuthStore";
-// Question Item Component
-const QuestionItem = ({ question, answer, onOptionSelect }) => {
-    return (
-        <div className="mt-4 border-t pt-4 col-span-4 h-full overflow-y-auto">
-            <h3 className="text-lg font-medium">Question {question.id} • {question.marks} points</h3>
-            <p className="mt-2 text-gray-700">{question.title}</p>
-            <div className="mt-4 space-y-2 h-64 overflow-y-auto">
-                {question.type === 'MCQ' && question.options.map((option, index) => (
-                    <label
-                        key={index}
-                        className={`flex items-center p-3 border rounded-lg cursor-pointer transition ${
-                            answer?.selected_option === index ? "border-blue-500 bg-blue-100" : "border-gray-300"
-                        }`}
-                    >
-                        <input
-                            type="radio"
-                            name="quiz"
-                            className="hidden"
-                            onChange={()=>{}}
-                            checked={answer?.selected_option === index}
-                            onClick={() => onOptionSelect(index)}
-                        />
-                        <span
-                            className={`w-5 h-5 flex items-center justify-center border rounded-full mr-3 ${
-                                answer?.selected_option === index ? "border-blue-500" : "border-gray-300"
-                            }`}
-                        >
-                            {answer?.selected_option === index && (
-                                <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
-                            )}
-                        </span>
-                        {option}
-                    </label>
-                ))}
-                {question.type === 'DS' && (
-                    <textarea
-                        type="text"
-                        className="border rounded-lg p-2 w-full h-48 resize-none"
-                        placeholder="Type your answer here..."
-                        value={answer?.answer_text || ""}
-                        onChange={(e) => onOptionSelect(e.target.value)}
-                    />
-                )}
-            </div>
-        </div>
-    );
-};
-
-// Enhanced Question Status Component
-const QuestionStatus = ({ questions, answers, currentQuestionIndex, markedForReview, onQuestionSelect }) => {
-    const getStatusStyles = (index) => {
-        if (index === currentQuestionIndex) {
-            return "bg-blue-500 ring-2 ring-blue-300 shadow-lg scale-110";
-        }
-        if ((answers[index]?.selected_option !== null || answers[index]?.answer_text) && markedForReview[index]) {
-            return "bg-purple-500 hover:bg-purple-600";
-        }
-        if (answers[index]?.selected_option !== null || answers[index]?.answer_text) {
-            return "bg-green-500 hover:bg-green-600";
-        }
-        if (markedForReview[index]) {
-            return "bg-yellow-500 hover:bg-yellow-600";
-        }
-        return "bg-gray-300 hover:bg-gray-400";
-    };
-
-    return (
-        <div className="flex flex-col gap-4 mt-4 col-span-2">
-            <div className="overflow-y-auto grid grid-cols-5 gap-3 p-4 bg-gray-50 rounded-xl shadow-md max-h-[calc(70vh-100px)] border border-gray-200">
-                {questions.map((_, index) => (
-                    <button
-                        key={index}
-                        onClick={() => onQuestionSelect(index)}
-                        className={`w-10 h-10 flex items-center justify-center text-white rounded-full ${getStatusStyles(index)} 
-                            transform transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400`}
-                    >
-                        <span className="font-medium">{index + 1}</span>
-                    </button>
-                ))}
-            </div>
-
-            <div className="text-sm mt-2 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                {[
-                    { color: "bg-blue-500", text: "Current Question" },
-                    { color: "bg-green-500", text: "Attempted" },
-                    { color: "bg-yellow-500", text: "Marked for Review" },
-                    { color: "bg-purple-500", text: "Attempted & Marked" },
-                    { color: "bg-gray-300", text: "Unattempted" },
-                ].map((status, idx) => (
-                    <div key={idx} className="flex items-center mb-2 last:mb-0">
-                        <div className={`w-4 h-4 ${status.color} rounded-full mr-2 shadow-sm`}></div>
-                        <span className="text-gray-700">{status.text}</span>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
-
+import Instructions from "./Instructions";
+import QuestionItem from "./QuestionItem";
+import QuestionStatus from "./QuestionStatus";
 
 // QuizQuestion Component
 const QuizQuestion = () => {
@@ -114,47 +18,25 @@ const QuizQuestion = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [submitting, setSubmitting] = useState(false);
-    const [isVisible, setIsVisible] = useState(true);
-    const blurCountRef = useRef(0);
     const  user = useAuthStore((state) => state.user);
+    const [showInstructions, setShowInstructions] = useState(true);
+    const videoRef = useRef(null);
+    const [stream, setStream] = useState(null);
     if(!user)navigate('/signin');
-    //anamolies
+    
+
     useEffect(() => {
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'hidden') {
-                setIsVisible(false);
-                blurCountRef.current += 1;
+        if(videoRef.current && stream) {
+            videoRef.current.srcObject = stream;
+            videoRef.current.play().catch((error) => {
+                console.error("Error playing video:", error);
+            });
+        }
+    },[showInstructions])
+    
 
-                if (blurCountRef.current >= 3) {
-                    alert("You've left the test too many times. Your test will be auto-submitted.");
-                    handleEndTest();
-                } else {
-                    alert(`Warning: Don't switch tabs during the test! (${blurCountRef.current}/3 attempts)`);
-                }
-            } else {
-                setIsVisible(true);
-            }
-        };
-
-        const handleWindowResize = () => {
-            if (
-                window.innerHeight < screen.availHeight - 100 ||
-                window.innerWidth < screen.availWidth - 100
-            ) {
-                handleVisibilityChange(); 
-            }
-        };
-
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        window.addEventListener('resize', handleWindowResize);
-
-        return () => {
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-            window.removeEventListener('resize', handleWindowResize);
-        };
-    }, []);
     useEffect(() => {
-        
+  
         const arr = Array(questions.length).fill(false);
         setMarkedForReview(arr);
         async function fetchQuestions() {
@@ -177,8 +59,7 @@ const QuizQuestion = () => {
         }
         fetchQuestions();
 
-       
-    }, [id]);
+    }, [id,stream]);
 
     // Timer logic
     useEffect(() => {
@@ -236,6 +117,8 @@ const QuizQuestion = () => {
 
     // Handle quiz end
     const handleEndTest = async () => {
+        
+    
         setSubmitting(true);
 
         const submissionData = {
@@ -253,7 +136,11 @@ const QuizQuestion = () => {
             setSubmitting(false);
         }
     };
+     if (showInstructions) {
+       return <Instructions testData={testData}  setShowInstructions={setShowInstructions} setStream={setStream} stream={stream}/>;
+    }
 
+    
     if (questions.length === 0) {
         return (
             <div className="text-center text-2xl font-bold mt-10 text-gray-600 animate-pulse">
@@ -261,6 +148,8 @@ const QuizQuestion = () => {
             </div>
         );
     }
+
+   
 
     if (submitting) {
         return (
@@ -277,12 +166,15 @@ const QuizQuestion = () => {
     }
 
     return (
+        
+        
         <div className="max-w-6xl mx-auto p-6 shadow-xl rounded-2xl border border-gray-100 bg-white">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-semibold text-gray-800">{testData.title}</h2>
                 <button 
                     className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200 shadow-md"
                     onClick={handleEndTest}
+                    disabled={submitting }
                 >
                     End Test
                 </button>
@@ -317,7 +209,7 @@ const QuizQuestion = () => {
                             : "bg-gray-600 text-white hover:bg-gray-700"
                     }`}
                     onClick={handlePrevious} 
-                    disabled={currentQuestionIndex === 0}
+                    disabled={currentQuestionIndex === 0 }
                 >
                     Previous
                 </button>
@@ -341,11 +233,22 @@ const QuizQuestion = () => {
                             : "bg-blue-600 text-white hover:bg-blue-700"
                     }`}
                     onClick={handleNext}
-                    disabled={currentQuestionIndex === questions.length - 1}
+                    disabled={currentQuestionIndex === questions.length - 1 }
                 >
                     Next
                 </button>
             </div>
+        {/* video */}
+       <div className="fixed bottom-4 right-4 z-50 w-48 h-36 bg-black rounded-lg overflow-hidden border-2 border-blue-500 shadow-lg">
+  <video
+    ref={videoRef}
+    autoPlay
+    playsInline
+    muted
+    className="w-full h-full object-cover transform -scale-x-100" // Mirror effect
+  />
+  
+</div>        
         </div>
     );
 };
