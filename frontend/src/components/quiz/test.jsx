@@ -1,11 +1,11 @@
-import { useState, useEffect,useRef } from "react";
+import { useState, useEffect } from "react";
 import api from "../../../axios.config";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import useAuthStore from "../../store/useAuthStore";
 import Instructions from "./Instructions";
 import QuestionItem from "./QuestionItem";
 import QuestionStatus from "./QuestionStatus";
+import { useOnRefresh } from "../../hooks/useOnRefresh";
 
 // QuizQuestion Component
 const QuizQuestion = () => {
@@ -18,27 +18,18 @@ const QuizQuestion = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [submitting, setSubmitting] = useState(false);
-    const  user = useAuthStore((state) => state.user);
+    const user = useAuthStore((state) => state.user);
     const [showInstructions, setShowInstructions] = useState(true);
-    const videoRef = useRef(null);
-    const [stream, setStream] = useState(null);
-    if(!user)navigate('/signin');
-    
+
+    if (!user) navigate('/signin');
+
+    // Custom hook to handle page refresh warning
+    useOnRefresh(!showInstructions);
 
     useEffect(() => {
-        if(videoRef.current && stream) {
-            videoRef.current.srcObject = stream;
-            videoRef.current.play().catch((error) => {
-                console.error("Error playing video:", error);
-            });
-        }
-    },[showInstructions])
-    
-
-    useEffect(() => {
-  
         const arr = Array(questions.length).fill(false);
         setMarkedForReview(arr);
+
         async function fetchQuestions() {
             try {
                 const res = await api.get(`/tests/attempt/${id}/`);
@@ -46,7 +37,6 @@ const QuizQuestion = () => {
                 setQuestions(res.data.test_questions);
                 setTimeLeft(res.data.duration * 60);
 
-                // Initialize answers array
                 const default_ans = res.data.test_questions.map((question) => ({
                     question_id: question.id,
                     answer_text: question.type === 'DS' ? "" : null,
@@ -57,9 +47,9 @@ const QuizQuestion = () => {
                 console.error("Error fetching questions:", error);
             }
         }
-        fetchQuestions();
 
-    }, [id,stream]);
+        fetchQuestions();
+    }, [id]);
 
     // Timer logic
     useEffect(() => {
@@ -68,16 +58,13 @@ const QuizQuestion = () => {
             return;
         }
         const timer = setTimeout(() => {
-            if(timeLeft <=0) handleEndTest();
-            else{
-            setTimeLeft((prev) => prev - 1);
-        }
+            if (timeLeft <= 0) handleEndTest();
+            else setTimeLeft((prev) => prev - 1);
         }, 1000);
 
         return () => clearTimeout(timer);
     }, [timeLeft]);
 
-    // Handle option selection
     const handleAnswer = (value) => {
         const currentAnswer = answers[currentQuestionIndex];
         const isAlreadySelected = currentAnswer.selected_option === value;
@@ -96,29 +83,23 @@ const QuizQuestion = () => {
         setAnswers(updatedAnswers);
     };
 
-    // Handle navigation to the next question
     const handleNext = () => {
         if (currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex((prev) => prev + 1);
         }
     };
 
-    // Handle navigation to the previous question
     const handlePrevious = () => {
         if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex((prev) => prev - 1);
         }
     };
 
-    // Handle question selection from status
     const handleQuestionSelect = (index) => {
         setCurrentQuestionIndex(index);
     };
 
-    // Handle quiz end
     const handleEndTest = async () => {
-        
-    
         setSubmitting(true);
 
         const submissionData = {
@@ -127,7 +108,7 @@ const QuizQuestion = () => {
         };
 
         try {
-            const response = await api.post('/tests/submit-test/', submissionData);
+            await api.post('/tests/submit-test/', submissionData);
             navigate('/');
         } catch (error) {
             console.error("Error submitting test:", error);
@@ -136,11 +117,16 @@ const QuizQuestion = () => {
             setSubmitting(false);
         }
     };
-     if (showInstructions) {
-       return <Instructions testData={testData}  setShowInstructions={setShowInstructions} setStream={setStream} stream={stream}/>;
+
+    if (showInstructions) {
+        return (
+            <Instructions
+                testData={testData}
+                setShowInstructions={setShowInstructions}
+            />
+        );
     }
 
-    
     if (questions.length === 0) {
         return (
             <div className="text-center text-2xl font-bold mt-10 text-gray-600 animate-pulse">
@@ -149,11 +135,9 @@ const QuizQuestion = () => {
         );
     }
 
-   
-
     if (submitting) {
         return (
-            <div className="flex flex-col justify-center items-center min-h-full bg-gray-50" >
+            <div className="flex flex-col justify-center items-center min-h-full bg-gray-50">
                 <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
                     <div className="flex flex-col items-center">
                         <h1 className="text-2xl font-bold text-blue-600 mb-4">Submitting your response...</h1>
@@ -166,15 +150,13 @@ const QuizQuestion = () => {
     }
 
     return (
-        
-        
         <div className="max-w-6xl mx-auto p-6 shadow-xl rounded-2xl border border-gray-100 bg-white">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-semibold text-gray-800">{testData.title}</h2>
-                <button 
+                <button
                     className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200 shadow-md"
                     onClick={handleEndTest}
-                    disabled={submitting }
+                    disabled={submitting}
                 >
                     End Test
                 </button>
@@ -185,10 +167,10 @@ const QuizQuestion = () => {
             </div>
 
             <div className="mt-6 pt-4 grid grid-cols-6 gap-6 ">
-                <QuestionStatus 
-                    questions={questions} 
-                    answers={answers} 
-                    currentQuestionIndex={currentQuestionIndex} 
+                <QuestionStatus
+                    questions={questions}
+                    answers={answers}
+                    currentQuestionIndex={currentQuestionIndex}
                     markedForReview={markedForReview}
                     onQuestionSelect={handleQuestionSelect}
                 />
@@ -202,14 +184,14 @@ const QuizQuestion = () => {
             </div>
 
             <div className="flex justify-between items-center mt-8 bg-gray-50 p-4 rounded-lg">
-                <button 
+                <button
                     className={`px-6 py-2 rounded-lg font-medium transition-colors duration-200 shadow-md ${
-                        currentQuestionIndex === 0 
-                            ? "bg-gray-200 text-gray-400 cursor-not-allowed" 
+                        currentQuestionIndex === 0
+                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                             : "bg-gray-600 text-white hover:bg-gray-700"
                     }`}
-                    onClick={handlePrevious} 
-                    disabled={currentQuestionIndex === 0 }
+                    onClick={handlePrevious}
+                    disabled={currentQuestionIndex === 0}
                 >
                     Previous
                 </button>
@@ -233,22 +215,11 @@ const QuizQuestion = () => {
                             : "bg-blue-600 text-white hover:bg-blue-700"
                     }`}
                     onClick={handleNext}
-                    disabled={currentQuestionIndex === questions.length - 1 }
+                    disabled={currentQuestionIndex === questions.length - 1}
                 >
                     Next
                 </button>
             </div>
-        {/* video */}
-       <div className="fixed bottom-4 right-4 z-50 w-48 h-36 bg-black rounded-lg overflow-hidden border-2 border-blue-500 shadow-lg">
-  <video
-    ref={videoRef}
-    autoPlay
-    playsInline
-    muted
-    className="w-full h-full object-cover transform -scale-x-100" // Mirror effect
-  />
-  
-</div>        
         </div>
     );
 };
