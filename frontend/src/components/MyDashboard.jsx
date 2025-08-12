@@ -57,7 +57,7 @@ export default function Home() {
             {data.length==0&&<div className=" flex justify-center items-center  w-full">
               <h1 className="text-gray-300 text-6xl font-extrabold">No Classrooms</h1>
               </div>}
-            {data.map((item) => (
+            {data?.map((item) => (
               <ClassroomCard
                 title={item.name}
                 teacher={item.creator_name}
