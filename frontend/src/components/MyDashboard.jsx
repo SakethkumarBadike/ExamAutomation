@@ -45,6 +45,11 @@ export default function Home() {
       setIsLoading(false); // If no user, set loading to false
     }
   }, [updatedClass]);
+  if(!Array.isArray(data) || data.length === 0) {
+    return <div className="h-screen w-full flex justify-center items-center">
+      <h1 className="text-gray-300 text-6xl font-extrabold">No Classrooms</h1>
+    </div>;
+  }
   return (
     <div className="h-full w-full">  {/* changed height from screen to full*/}
       <div className="overflow-y-auto">

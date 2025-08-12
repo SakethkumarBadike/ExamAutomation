@@ -171,7 +171,7 @@ EMAIL_HOST_USER = 'bunnybunny210405@gmail.com'  # Your email
 EMAIL_HOST_PASSWORD = 'rqmj ynkd viuo lftu'  # Not your email password! (See below)
 DEFAULT_FROM_EMAIL = 'your-email@gmail.com'  # Same as EMAIL_HOST_USER
 
-FRONTEND_URL = 'http://localhost:5173'  # Replace with your frontend URL
+FRONTEND_URL = 'https://exam-automation-lvc2liz7i-sakethkumarbadikes-projects.vercel.app/' #'http://localhost:5173'  # Replace with your frontend URL
 #rqmj ynkd viuo lftu
 
 SIMPLE_JWT = {
