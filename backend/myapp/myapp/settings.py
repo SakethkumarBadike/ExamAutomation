@@ -46,7 +46,7 @@ SECRET_KEY = 'django-insecure-i&gd1@$1@iim)m)ldt0ex5+nz77j4k!=k8p$+2s5fa2%imxz$a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["examautomation.onrender.com"]
 
 TIME_ZONE = 'UTC'
 USE_TZ = True
