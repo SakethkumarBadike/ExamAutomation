@@ -125,12 +125,8 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')
 
-<<<<<<< HEAD
-FRONTEND_URL = 'http://localhost:5173'
-=======
 FRONTEND_URL = 'https://examautomation-7jxq.onrender.com' #'http://localhost:5173'  # Replace with your frontend URL
-#rqmj ynkd viuo lftu
->>>>>>> 976779663ef47ad693bf63047348a316929468bf
+
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
