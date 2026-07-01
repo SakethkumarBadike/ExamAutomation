@@ -23,7 +23,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-i&gd1@$1@iim)m)ldt0ex
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["examautomation.onrender.com"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -125,7 +125,12 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')
 
+<<<<<<< HEAD
 FRONTEND_URL = 'http://localhost:5173'
+=======
+FRONTEND_URL = 'https://examautomation-7jxq.onrender.com' #'http://localhost:5173'  # Replace with your frontend URL
+#rqmj ynkd viuo lftu
+>>>>>>> 976779663ef47ad693bf63047348a316929468bf
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),

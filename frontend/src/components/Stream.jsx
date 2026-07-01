@@ -120,7 +120,7 @@ const Stream = () => {
 
         {/* Announcements List */}
         {announcementsList.length > 0 ? (
-          announcementsList.map((announcement) => (
+          announcementsList?.map((announcement) => (
             <div key={announcement.id} className="border-t pt-4 mt-4">
               <h3 className="text-lg font-semibold">{announcement.title}</h3>
               <p className="text-gray-700 mt-1">{announcement.content}</p>
