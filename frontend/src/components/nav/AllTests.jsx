@@ -11,9 +11,8 @@ const QuizList = () => {
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
-        const response = await api.get("/tests/all-tests");
-        setQuizzes(response.data[0].tests || []);
-        console.log(response.data[0].tests);
+        const response = await api.get("/tests/all-tests/");
+        setQuizzes(response.data || []);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching quizzes:", error);
@@ -27,10 +26,8 @@ const QuizList = () => {
   
   const categorizeQuizzes = (quizzes) => {
     const now = new Date();
-    console.log(now);
     return quizzes.reduce((acc, quiz) => {
       const start = new Date(quiz.start_time)
-      console.log(new Date(quiz.start_time));
       const end = new Date(quiz.end_time)
 
       if (now >= start && now <= end) {
@@ -81,7 +78,6 @@ const QuizList = () => {
   }
 
   const categorizedQuizzes = categorizeQuizzes(quizzes);
-  console.log(categorizedQuizzes);
   return (
     <div className="max-w-6xl mx-auto p-6 font-sans">
       <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">

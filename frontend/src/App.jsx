@@ -18,6 +18,7 @@ import Results from './components/quiz/Results'
 import ForgetPassword from './components/auth/ForgetPassword';
 import ResetPassword from './components/auth/ResetPassword';
 import useAuthStore from './store/useAuthStore';
+import { MissedQuizDetails } from './components/quiz/MissedQuizDetails';
 
 function App() {
   const router = createBrowserRouter([
@@ -35,7 +36,8 @@ function App() {
     {path: `/classroom/:id`, element: <ClassRoom/>, children: [
       {path:"quizes",element:<QuizLayout/>,children:[{path:"",element:<Quiz/>},{path:"create-quiz",element:<CreateQuiz/>},]},
        {path:"people",element:<PeopleSection/>},
-       {path:"stream",element:<Stream/>}
+       {path:"stream",element:<Stream/>},
+       {path:"quiz/missed-details/:quizId",element:<MissedQuizDetails/>}
       ]},
    
 

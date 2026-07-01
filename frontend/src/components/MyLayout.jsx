@@ -18,6 +18,7 @@ export default function MyLayout() {
   const { user ,checkAuth} = useAuthStore();
   const [isToastVisible, setIsToastVisible] = useState(false);
   const [data, setData] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { setUpdatedClass } = useClassroom();
   const [showSideBar, setShowSideBar] = useState(false);
     const [userLoggedIn, setUserLoggedIn] = useState(false);
@@ -26,6 +27,11 @@ export default function MyLayout() {
 
   // Handle create/join classroom
   async function handleOnClick() {
+    if (!data.trim()) {
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       if(!userLoggedIn){
@@ -62,6 +68,8 @@ export default function MyLayout() {
         draggable: true,
         progress: undefined,
       });
+    } finally {
+      setIsSubmitting(false);
     }
     setData("");
   }
@@ -153,9 +161,17 @@ if(user){
             />
             <button
               onClick={handleOnClick}
-              className="w-full bg-green-500 text-white mt-4 py-2 rounded-lg hover:bg-green-600 transition duration-300"
+              disabled={isSubmitting || !data.trim()}
+              className="w-full bg-green-500 text-white mt-4 py-2 rounded-lg hover:bg-green-600 transition duration-300 cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-2"
             >
-              {user.role === "T" ? "Create" : "Join"}
+              {isSubmitting ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <span>{user.role === "T" ? "Creating..." : "Joining..."}</span>
+                </>
+              ) : (
+                <span>{user.role === "T" ? "Create" : "Join"}</span>
+              )}
             </button>
           </div>
         </div>

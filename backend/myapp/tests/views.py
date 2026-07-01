@@ -5,9 +5,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from questions.models import Question
-from .serializers import SubmissionSerializer,StudentAllTestSerializer,TestResultSerializer
+from .serializers import SubmissionSerializer,StudentTestSerializer,TestResultSerializer
 from .models import Submission
 from users.models import CustomUser
+from classrooms.models import Enrollment
 
 class TestListCreateView(generics.ListCreateAPIView):
     queryset = Test.objects.all()
@@ -74,10 +75,17 @@ class SubmitTestView(generics.CreateAPIView):
 
 
 class StudentTestView(generics.ListAPIView):
-      serializer_class = StudentAllTestSerializer
-      def get_queryset(self):
-            user = self.request.user
-            return CustomUser.objects.filter(id=user.id)
+    permission_classes = [IsAuthenticated]
+    serializer_class = StudentTestSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == "T":
+            classroom_ids = user.classrooms.values_list("id", flat=True)
+            return Test.objects.filter(classroom_id__in=classroom_ids).select_related("classroom").distinct()
+
+        enrolled_classroom_ids = Enrollment.objects.filter(student_id=user.id).values_list("classroom_id", flat=True)
+        return Test.objects.filter(classroom_id__in=enrolled_classroom_ids).select_related("classroom").distinct()
       
 class TestResultView(generics.RetrieveAPIView):
     lookup_field = 'id'

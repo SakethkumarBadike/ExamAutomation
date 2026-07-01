@@ -10,6 +10,7 @@ const ClassroomCard = ({ title, teacher, id }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [toast, setToast] = useState(null);
   const [confirmToast, setConfirmToast] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
   const { user } = useAuthStore();
   const { setUpdatedClass } = useClassroom();
 
@@ -23,21 +24,36 @@ const ClassroomCard = ({ title, teacher, id }) => {
 
   function handleClick(e) {
     e.stopPropagation();
+    if (actionLoading) {
+      return;
+    }
     setShowOptions(!showOptions);
   }
 
   async function handleDeleteConfirm() {
-    await api.delete(`/classrooms/${id}/`);
-    setUpdatedClass(true);
-    showToast("Class deleted successfully!", "error");
-    setConfirmToast(null);
+    setActionLoading(true);
+
+    try {
+      await api.delete(`/classrooms/${id}/`);
+      setUpdatedClass(true);
+      showToast("Class deleted successfully!", "error");
+      setConfirmToast(null);
+    } finally {
+      setActionLoading(false);
+    }
   }
 
   async function handleExitConfirm() {
-    await api.delete(`/classrooms/enrollments/${id}/`);
-    setUpdatedClass(true);
-    showToast("You exited the class!", "info");
-    setConfirmToast(null);
+    setActionLoading(true);
+
+    try {
+      await api.delete(`/classrooms/enrollments/${id}/`);
+      setUpdatedClass(true);
+      showToast("You exited the class!", "info");
+      setConfirmToast(null);
+    } finally {
+      setActionLoading(false);
+    }
   }
 
   function handleDelete(e) {
@@ -100,7 +116,7 @@ const ClassroomCard = ({ title, teacher, id }) => {
         {/* Open Class button */}
         <button
           onClick={() => navigate(`/classroom/${id}/quizes`)}
-          className="flex items-center space-x-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="flex cursor-pointer items-center space-x-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
           type="button"
           aria-label={`Open classroom ${title}`}
         >
@@ -113,7 +129,8 @@ const ClassroomCard = ({ title, teacher, id }) => {
           <button
             aria-label="Options"
             onClick={handleClick}
-            className="p-2 rounded-md hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="p-2 rounded-md hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={actionLoading}
             type="button"
           >
             <svg
@@ -137,7 +154,8 @@ const ClassroomCard = ({ title, teacher, id }) => {
               {user.role === "T" ? (
                 <button
                   onClick={handleDelete}
-                  className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md"
+                  className="flex cursor-pointer items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={actionLoading}
                   type="button"
                 >
                   <FaTrash className="mr-2" /> Delete Class
@@ -145,7 +163,8 @@ const ClassroomCard = ({ title, teacher, id }) => {
               ) : (
                 <button
                   onClick={handleExit}
-                  className="flex items-center w-full px-4 py-2 text-sm text-indigo-700 hover:bg-indigo-50 rounded-md"
+                  className="flex cursor-pointer items-center w-full px-4 py-2 text-sm text-indigo-700 hover:bg-indigo-50 rounded-md disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={actionLoading}
                   type="button"
                 >
                   <FaSignOutAlt className="mr-2" /> Exit Class
@@ -180,15 +199,24 @@ const ClassroomCard = ({ title, teacher, id }) => {
             <div className="flex justify-around">
               <button
                 onClick={() => setConfirmToast(null)}
-                className="px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400 transition"
+                className="px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400 transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={actionLoading}
               >
                 Cancel
               </button>
               <button
                 onClick={confirmToast.onConfirm}
-                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
+                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-2"
+                disabled={actionLoading}
               >
-                Confirm
+                {actionLoading ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span>{user.role === "T" ? "Deleting..." : "Exiting..."}</span>
+                  </>
+                ) : (
+                  <span>Confirm</span>
+                )}
               </button>
             </div>
           </div>
