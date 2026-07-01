@@ -21,7 +21,8 @@ export default function MyLayout() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { setUpdatedClass } = useClassroom();
   const [showSideBar, setShowSideBar] = useState(false);
-    const [userLoggedIn, setUserLoggedIn] = useState(false);
+  const [userLoggedIn, setUserLoggedIn] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   
 
@@ -82,11 +83,21 @@ export default function MyLayout() {
         setUserLoggedIn(true);
       } else {
         setUserLoggedIn(false);
-        navigate('/signin'); // Redirect to sign-in if not authenticated
+        navigate('/signin', { replace: true }); // Redirect to sign-in if not authenticated
       }
+      setAuthChecked(true);
     }
     checkUserAuth();
-  },[])
+  },[checkAuth, navigate])
+
+if (!authChecked) {
+  return (
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+      <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin mb-4"></div>
+      <p className="text-lg text-gray-600">Checking sign-in status...</p>
+    </div>
+  );
+}
 
 if(user){
   return (

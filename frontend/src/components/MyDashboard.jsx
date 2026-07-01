@@ -14,6 +14,12 @@ export default function Home() {
   const { user,checkAuth } = useAuthStore();
   const navigate = useNavigate();
   const { updatedClass, setUpdatedClass } = useClassroom();
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/signin");
+    }
+  }, [user, navigate]);
   
   useEffect(() => {
     async function fetchData() {
@@ -45,6 +51,23 @@ export default function Home() {
       setIsLoading(false); // If no user, set loading to false
     }
   }, [updatedClass]);
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+        <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin mb-4"></div>
+        <p className="text-lg text-gray-600">Redirecting to sign-in...</p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="h-full w-full flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
   if(!Array.isArray(data) || data.length === 0) {
     return <div className="h-screen w-full flex justify-center items-center">
       <h1 className="text-gray-300 text-6xl font-extrabold">No Classrooms</h1>
@@ -53,26 +76,17 @@ export default function Home() {
   return (
     <div className="h-full w-full">  {/* changed height from screen to full*/}
       <div className="overflow-y-auto">
-        {isLoading ? (
-          <div className="h-full w-full flex justify-center items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-          </div>
-        ) : (
-          <div className="flex flex-wrap gap-6 p-6">
-            {data.length==0&&<div className=" flex justify-center items-center  w-full">
-              <h1 className="text-gray-300 text-6xl font-extrabold">No Classrooms</h1>
-              </div>}
-            {data?.map((item) => (
-              <ClassroomCard
-                title={item.name}
-                teacher={item.creator_name}
-                key={item.code}
-                id={item.code}
-                
-              />
-            ))}
-          </div>
-        )}
+        <div className="flex flex-wrap gap-6 p-6">
+          {data?.map((item) => (
+            <ClassroomCard
+              title={item.name}
+              teacher={item.creator_name}
+              key={item.code}
+              id={item.code}
+              
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

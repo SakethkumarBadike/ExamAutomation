@@ -23,7 +23,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-i&gd1@$1@iim)m)ldt0ex
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ["examautomation.onrender.com"]
+ALLOWED_HOSTS = ["examautomation.onrender.com","localhost","127.0.0.1","https://exam-automation.vercel.app"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -82,6 +82,7 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST'),
         'PORT': config('DB_PORT'),
+        
     }
 }
 
@@ -125,7 +126,7 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')
 
-FRONTEND_URL = 'https://examautomation-7jxq.onrender.com' #'http://localhost:5173'  # Replace with your frontend URL
+FRONTEND_URL = 'https://exam-automation.vercel.app' #'http://localhost:5173'  # https://examautomation-7jxq.onrender.com Replace with your frontend URL
 
 
 SIMPLE_JWT = {
